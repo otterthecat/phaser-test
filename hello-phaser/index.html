@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>hello phaser!</title>
+        <script src="phaser.min.js"></script>
+    </head>
+    <body>
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+
+        var game = new Phaser.Game(800, 600, Phaser.AUTO, 'drive-test', {
+            preload: preload,
+            create: create,
+            update: update,
+            render: render
+        });
+        var car, terrain, cursors;
+
+        function preload () {
+            game.load.image('car', '../car4.png');
+            game.load.image('terrain', '../stone.png');
+        }
+
+        function create () {
+            game.physics.startSystem(Phaser.Physics.AUTO);
+            terrain = game.add.tileSprite(0, 0, 800, 600, 'terrain');
+
+            car = game.add.sprite(game.world.centerX, game.world.centerY, 'car');
+            car.name = 'car';
+            car.anchor.set(0.5);
+
+            game.physics.enable(car, Phaser.Physics.ARCADE);
+
+            car.body.collideWorldBounds = true;
+            car.body.bounce.set(0.8);
+            car.body.allowRotation = true;
+            car.body.immovable = true;
+
+            cursors = game.input.keyboard.createCursorKeys();
+        }
+
+        function update () {
+            car.body.velocity.x = 0;
+            car.body.velocity.y = 0;
+            car.body.angularVelocity = 0;
+
+            if (cursors.left.isDown) {
+                car.body.angularVelocity = -200;
+            }
+            else if (cursors.right.isDown) {
+                car.body.angularVelocity = 200;
+            }
+
+            if (cursors.up.isDown) {
+                car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(car.angle - 90, 300));
+            }
+            else if (cursors.down.isDown) {
+                car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(car.angle + 90, 150));
+            }
+        }
+
+        function render () {}
+    };
+
+    </script>
+
+    </body>
+</html>
