@@ -11,7 +11,7 @@
 
     window.onload = function() {
 
-        var game = new Phaser.Game(800, 600, Phaser.AUTO, 'drive-test', {
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'drive-test', {
             preload: preload,
             create: create,
             update: update,
@@ -26,7 +26,7 @@
 
         function create () {
             game.physics.startSystem(Phaser.Physics.AUTO);
-            terrain = game.add.tileSprite(0, 0, 800, 600, 'terrain');
+            terrain = game.add.tileSprite(50, 50, 1900, 1900, 'terrain');
 
             car = game.add.sprite(game.world.centerX, game.world.centerY, 'car');
             car.name = 'car';
@@ -39,6 +39,8 @@
             car.body.allowRotation = true;
             car.body.immovable = true;
 
+            game.world.setBounds(0, 0, 2000, 2000);
+            game.camera.follow(car);
             cursors = game.input.keyboard.createCursorKeys();
         }
 
