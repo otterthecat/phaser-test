@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>hello phaser!</title>
+        <title>hCar Test</title>
         <script src="phaser.min.js"></script>
     </head>
     <body>
@@ -27,14 +27,18 @@
 
         function create () {
             game.physics.startSystem(Phaser.Physics.AUTO);
+            // when adding tileSprite, we're positioning tiles
+            // so as to create a 50px border around the game world
             terrain = game.add.tileSprite(50, 50, 1900, 1900, 'terrain');
             blocks = game.add.group();
             blocks.enableBody = true;
 
+            // randomly create, position, and config individual blocks
             for (var i = 1; i < 6; i += 1){
                 var block = blocks.create(i * 300, i * 400, 'block');
                 block.body.collideWorldBounds = true;
                 block.name = 'block' + block;
+                // blocks are not allowed to move when collided
                 block.body.moves = false;
             }
 
@@ -47,7 +51,6 @@
             car.body.collideWorldBounds = true;
             car.body.bounce.set(0.8);
             car.body.allowRotation = true;
-           // car.body.immovable = true;
 
             game.world.setBounds(0, 0, 2000, 2000);
             game.camera.follow(car);
@@ -73,6 +76,7 @@
                 car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(car.angle - 90, 300));
             }
             else if (cursors.down.isDown) {
+                // going in reverse will be slower than driving forwards
                 car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(car.angle + 90, 150));
             }
         }
