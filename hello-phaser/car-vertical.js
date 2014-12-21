@@ -23,13 +23,26 @@
 
             blocks = game.add.group();
             blocks.enableBody = true;
+            blocks.physicsBodyType = Phaser.Physics.ARCADE;
+            blocks.createMultiple(5, 'block');
+            blocks.setAll('anchor.x', 0.5);
+            blocks.setAll('anchor.y', 0.5);
+            blocks.setAll('outOfBoundsKill', true);
+            blocks.setAll('checkWorldBounds', true);
+            launchBlock();
 
-            // randomly create, position, and config individual blocks
-            for (var i = 1; i < 2; i += 1){
-                var block = blocks.create((i * 30) + 50, i * 200, 'block');
-                block.body.collideWorldBounds = true;
-                block.body.bounce.setTo(1, 0.7);
-                block.body.velocity.setTo(0, 100);
+            function launchBlock() {
+                var MIN_BLOCK_SPACING = 300;
+                var MAX_BLOCK_SPACING = 1800;
+                var BLOCK_SPEED = -300;
+
+                var block = blocks.getFirstExists(false);
+                if (block) {
+                    block.reset(game.rnd.integerInRange(0, game.width), 728);
+                    block.body.velocity.y = BLOCK_SPEED;
+                    block.body.drag.x = 100;
+                }
+                game.time.events.add(game.rnd.integerInRange(MIN_BLOCK_SPACING, MAX_BLOCK_SPACING), launchBlock);
             }
 
 
@@ -42,6 +55,8 @@
             car.body.bounce.set(0);
 
             cursors = game.input.keyboard.createCursorKeys();
+
+            game.world.setBounds(0, 0, 800, 600);
         }
 
         function update () {
