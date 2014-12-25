@@ -21,6 +21,10 @@ var loadState = {
 		// Phaser will automatically create the progress bar
 		// functionality by calling .setPreloadSprite()
 		game.load.setPreloadSprite(progressBar);
+
+		// load the game assets
+		game.load.image('player', './img/player.png');
+		game.load.image('wall', './img/wallHorizontal.png');
 	},
 
 	create: function (){
