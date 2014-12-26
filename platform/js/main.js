@@ -20,9 +20,41 @@ var mainState = {
 		game.add.sprite(250, 350, 'wall', 0, this.walls);
 
 		this.walls.setAll('body.immovable', true);
+
+		// cheap light effect
+		this.LIGHT_RADIUS = 50;
+
+		// Create the shadow texture
+		this.shadowTexture = game.add.bitmapData(this.game.width, this.game.height);
+
+		// Create an object that will use the bitmap as a texture
+		var lightSprite = game.add.image(0, 0, this.shadowTexture);
+
+		// Set the blend mode to MULTIPLY. This will darken the colors of
+		// everything below this sprite.
+		lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
 	},
 
 	update: function (){
+
+		// set the "darkness" and use it to cover the game
+		this.shadowTexture.context.fillStyle = 'rgb(50, 50, 50)';
+		this.shadowTexture.context.fillRect(0, 0, game.width, game.height);
+
+		// draw the "light"
+		this.shadowTexture.context.beginPath();
+		this.shadowTexture.context.fillStyle = 'rgb(255, 255, 255)';
+		this.shadowTexture.context.arc(
+			this.player.x,
+			this.player.y,
+			this.LIGHT_RADIUS,
+			0,
+			Math.PI*2
+		);
+		this.shadowTexture.context.fill();
+
+		// This just tells the engine it should update the texture cache
+		this.shadowTexture.dirty = true;
 
 		// enable collision
 		game.physics.arcade.collide(this.player, this.walls);
