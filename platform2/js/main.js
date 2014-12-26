@@ -86,5 +86,10 @@ var mainState = {
 		// if (this.cursor.up.isDown && this.player.body.onFloor()) {
 		// 	this.player.body.velocity.y = -260;
 		// }
+
+		// if player falls out of world, just have him fall from the sky
+		if(this.player.y > 610){
+			this.player.y = -20;
+		}
 	}
 }
