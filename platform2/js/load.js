@@ -24,6 +24,7 @@ var loadState = {
 
 		// load the game assets
 		game.load.image('player', './img/player.png');
+		game.load.image('bullet', './img/bullet.png');
 		game.load.image('background', './img/sand-background.png');
 		game.load.image('sand-floor', './img/sand-floor.png');
 		game.load.tilemap('map', 'maps/sandMap.json', null, Phaser.Tilemap.TILED_JSON);

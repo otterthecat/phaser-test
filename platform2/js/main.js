@@ -10,6 +10,7 @@ var mainState = {
 
 		game.physics.arcade.enable(this.player);
 		this.player.body.gravity.y = 500;
+		this.PLAYER_DIRECTION = 'RIGHT';
 
 
 		this.creeps = game.add.group();
@@ -71,6 +72,28 @@ var mainState = {
 		// Set the blend mode to MULTIPLY. This will darken the colors of
 		// everything below this sprite.
 		lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
+
+		this.bullets = game.add.group();
+		this.bullets.enableBody = true;
+		this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+		this.bullets.createMultiple(1, 'bullet');
+		this.bullets.setAll('anchor.x', 0.5);
+		this.bullets.setAll('anchor.y', 0.5);
+		this.bullets.setAll('outOfBoundsKill', true);
+		this.bullets.setAll('checkWorldBounds', true);
+
+		this.spacekey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+		this.shoot = function() {
+			//  Grab the first bullet we can from the pool
+			var bullet = this.bullets.getFirstExists(false);
+
+			if (bullet){
+				//  And fire it
+				bullet.reset(this.player.x, this.player.y);
+				bullet.body.velocity.x = this.PLAYER_DIRECTION === 'LEFT' ? -300 : 300;
+			}
+		}
 	},
 
 	update: function (){
@@ -101,12 +124,19 @@ var mainState = {
 			enemy.kill();
 		}, null, this);
 
+		game.physics.arcade.collide(this.bullets, this.creeps, function(bullet, enemy){
+			bullet.kill();
+			enemy.kill();
+		}, null, this);
+
 		// move player
 		if (this.cursor.left.isDown) {
 			this.player.body.velocity.x = -200;
+			this.PLAYER_DIRECTION = 'LEFT';
 		}
 		else if (this.cursor.right.isDown) {
 			this.player.body.velocity.x = 200;
+			this.PLAYER_DIRECTION = 'RIGHT';
 		}
 		else if (this.cursor.up.isDown) {
 			this.player.body.velocity.y = -260;
@@ -114,6 +144,11 @@ var mainState = {
 		else {
 		// stop player
 		this.player.body.velocity.x = 0;
+		}
+
+
+		if(this.spacekey.isDown){
+			this.shoot.call(this);
 		}
 
 		// Player must be touching the ground to jump
