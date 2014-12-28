@@ -11,6 +11,37 @@ var mainState = {
 		game.physics.arcade.enable(this.player);
 		this.player.body.gravity.y = 500;
 
+
+		this.creeps = game.add.group();
+		this.creeps.enableBody = true;
+		this.creeps.physicsBodyType = Phaser.Physics.ARCADE;
+		this.creeps.createMultiple(10, 'player');
+		this.creeps.setAll('anchor.x', 0.5);
+		this.creeps.setAll('anchor.y', 0.5);
+		this.creeps.setAll('outOfBoundsKill', true);
+		this.creeps.setAll('checkWorldBounds', true);
+		this.creeps.setAll('body.gravity.y', 500);
+		this.creeps.setAll('tint', '#ff0033');
+
+		launchCreep.call(this);
+
+		function launchCreep() {
+
+			var _this = this;
+			var MIN_BLOCK_SPACING = 300;
+			var MAX_BLOCK_SPACING = 3600;
+			var BLOCK_SPEED = -200;
+
+			var creep = _this.creeps.getFirstExists(false);
+			if (creep) {
+				creep.reset(game.width / 2, -20);
+				creep.body.bounce.y = 0.5;
+				creep.body.bounce.x = 1;
+				creep.body.velocity.x = game.rnd.integerInRange(0, 10) % 2 ? 75 : -75;
+			}
+			game.time.events.add(game.rnd.integerInRange(MIN_BLOCK_SPACING, MAX_BLOCK_SPACING), launchCreep.bind(_this));
+		}
+
 		// initialize key controls
 		this.cursor = game.input.keyboard.createCursorKeys();
 
@@ -65,6 +96,10 @@ var mainState = {
 
 		// enable collision
 		game.physics.arcade.collide(this.player, this.layer);
+		game.physics.arcade.collide(this.creeps, this.layer);
+		game.physics.arcade.collide(this.player, this.creeps, function(player, enemy){
+			enemy.kill();
+		}, null, this);
 
 		// move player
 		if (this.cursor.left.isDown) {
