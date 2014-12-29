@@ -25,7 +25,7 @@ var mainState = {
 		this.creeps.setAll('outOfBoundsKill', true);
 		this.creeps.setAll('checkWorldBounds', true);
 		this.creeps.setAll('body.gravity.y', 400);
-		this.creeps.setAll('tint', '#ff0033');
+		this.creeps.setAll('tint', 0xFF0033);
 
 		launchCreep.call(this);
 
