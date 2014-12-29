@@ -28,6 +28,8 @@ var loadState = {
 		game.load.image('background', './img/sand-background.png');
 		game.load.image('sand-floor', './img/sand-floor.png');
 		game.load.tilemap('map', 'maps/sandMap.json', null, Phaser.Tilemap.TILED_JSON);
+
+		game.load.audio('jump', ['./audio/jump.mp3', './audio/jump.ogg']);
 	},
 
 	create: function (){

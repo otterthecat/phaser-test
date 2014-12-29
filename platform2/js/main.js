@@ -12,6 +12,9 @@ var mainState = {
 		this.player.body.gravity.y = 400;
 		this.PLAYER_DIRECTION = 'RIGHT';
 
+		this.jumpSound = game.add.audio('jump');
+		this.jumpSound.volume = 0.5;
+		this.jumpSound.addMarker('jumpMark', 0.1, 0.8);
 
 		this.creeps = game.add.group();
 		this.creeps.enableBody = true;
@@ -139,14 +142,10 @@ var mainState = {
 			this.player.body.velocity.x = 160;
 			this.PLAYER_DIRECTION = 'RIGHT';
 		}
-		else if (this.cursor.up.isDown) {
-			this.player.body.velocity.y = -200;
-		}
 		else {
-		// stop player
-		this.player.body.velocity.x = 0;
+			// stop player
+			this.player.body.velocity.x = 0;
 		}
-
 
 		if(this.spacekey.isDown){
 			this.shoot.call(this);
@@ -154,9 +153,10 @@ var mainState = {
 
 		// Player must be touching the ground to jump
 		// note the .onFloor() call, which is used when tilemaps are implemented
-		// if (this.cursor.up.isDown && this.player.body.onFloor()) {
-		// 	this.player.body.velocity.y = -260;
-		// }
+		if (this.cursor.up.isDown && this.player.body.onFloor()) {
+			this.player.body.velocity.y = -250;
+			this.jumpSound.play('jumpMark');
+		}
 
 		// if player falls out of world, just have him fall from the sky
 		if(this.player.y > 610){
