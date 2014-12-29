@@ -9,7 +9,7 @@ var mainState = {
 		this.player.anchor.setTo(0.5, 0.5);
 
 		game.physics.arcade.enable(this.player);
-		this.player.body.gravity.y = 500;
+		this.player.body.gravity.y = 400;
 		this.PLAYER_DIRECTION = 'RIGHT';
 
 
@@ -21,7 +21,7 @@ var mainState = {
 		this.creeps.setAll('anchor.y', 0.5);
 		this.creeps.setAll('outOfBoundsKill', true);
 		this.creeps.setAll('checkWorldBounds', true);
-		this.creeps.setAll('body.gravity.y', 500);
+		this.creeps.setAll('body.gravity.y', 400);
 		this.creeps.setAll('tint', '#ff0033');
 
 		launchCreep.call(this);
@@ -36,7 +36,7 @@ var mainState = {
 			var creep = _this.creeps.getFirstExists(false);
 			if (creep) {
 				creep.reset(game.width / 2, -20);
-				creep.body.bounce.y = 0.5;
+				creep.body.bounce.y = 0.6;
 				creep.body.bounce.x = 1;
 				creep.body.velocity.x = game.rnd.integerInRange(0, 10) % 2 ? 75 : -75;
 			}
@@ -77,7 +77,8 @@ var mainState = {
 		this.bullets.enableBody = true;
 		this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
 		this.bullets.createMultiple(1, 'bullet');
-		this.bullets.setAll('anchor.x', 0.5);
+		var anchorX = this.PLAYER_DIRECTION === 'LEFT' ? 0 : 1;
+		this.bullets.setAll('anchor.x', anchorX);
 		this.bullets.setAll('anchor.y', 0.5);
 		this.bullets.setAll('outOfBoundsKill', true);
 		this.bullets.setAll('checkWorldBounds', true);
@@ -91,7 +92,7 @@ var mainState = {
 			if (bullet){
 				//  And fire it
 				bullet.reset(this.player.x, this.player.y);
-				bullet.body.velocity.x = this.PLAYER_DIRECTION === 'LEFT' ? -300 : 300;
+				bullet.body.velocity.x = this.PLAYER_DIRECTION === 'LEFT' ? -200 : 200;
 			}
 		}
 	},
@@ -99,7 +100,7 @@ var mainState = {
 	update: function (){
 
 		// set the "darkness" and use it to cover the game
-		this.shadowTexture.context.fillStyle = 'rgb(20, 20, 20)';
+		this.shadowTexture.context.fillStyle = 'rgb(40, 40, 40)';
 		this.shadowTexture.context.fillRect(0, 0, game.width, game.height);
 
 		// draw the "light"
@@ -131,15 +132,15 @@ var mainState = {
 
 		// move player
 		if (this.cursor.left.isDown) {
-			this.player.body.velocity.x = -200;
+			this.player.body.velocity.x = -160;
 			this.PLAYER_DIRECTION = 'LEFT';
 		}
 		else if (this.cursor.right.isDown) {
-			this.player.body.velocity.x = 200;
+			this.player.body.velocity.x = 160;
 			this.PLAYER_DIRECTION = 'RIGHT';
 		}
 		else if (this.cursor.up.isDown) {
-			this.player.body.velocity.y = -260;
+			this.player.body.velocity.y = -200;
 		}
 		else {
 		// stop player
