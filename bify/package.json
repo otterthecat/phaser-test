@@ -1,0 +1,26 @@
+{
+  "name": "phaserify",
+  "version": "1.0.0",
+  "description": "Phaser & Browserify playground",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/otterthecat/phaser-test.git"
+  },
+  "keywords": [
+    "Phaser",
+    "Browserify"
+  ],
+  "author": "Otter the Cat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/otterthecat/phaser-test/issues"
+  },
+  "homepage": "https://github.com/otterthecat/phaser-test",
+  "dependencies": {
+    "phaser": "^2.2.1"
+  }
+}
