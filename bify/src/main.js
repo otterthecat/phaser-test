@@ -1,6 +1,6 @@
 var mainState = function (game) {
 
-	return = {
+	return {
 		create: function (){
 			console.log('starting main.js');
 

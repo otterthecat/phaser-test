@@ -22,5 +22,20 @@
   "homepage": "https://github.com/otterthecat/phaser-test",
   "dependencies": {
     "phaser": "^2.2.1"
+  },
+  "browserify": {
+    "transform": ["browserify-shim"]
+  },
+  "browser": {
+    "Phaser": "./public/js/lib/phaser.min.js"
+  },
+  "browserify-shim": {
+    "Phaser": {
+      "exports": "Phaser"
+    }
+  },
+  "devDependencies": {
+    "browserify": "^8.0.2",
+    "browserify-shim": "^3.8.2"
   }
 }

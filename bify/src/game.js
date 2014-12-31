@@ -1,6 +1,7 @@
 var bootState = require('./boot');
 var loadState = require('./load');
 var mainState = require('./main');
+var Phaser = require('Phaser');
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO);
 
