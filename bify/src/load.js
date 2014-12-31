@@ -28,7 +28,7 @@ var load = function(game){
 			game.load.image('bullet', './img/bullet.png');
 			game.load.image('background', './img/sand-background.png');
 			game.load.image('sand-floor', './img/sand-floor.png');
-			game.load.tilemap('map', 'maps/sandMap.json', null, Phaser.Tilemap.TILED_JSON);
+			game.load.tilemap('map', './js/maps/sandMap.json', null, Phaser.Tilemap.TILED_JSON);
 
 			game.load.audio('jump', ['./audio/jump.mp3', './audio/jump.ogg']);
 		},
