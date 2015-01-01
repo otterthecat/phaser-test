@@ -27,7 +27,7 @@
     "transform": ["browserify-shim"]
   },
   "browser": {
-    "Phaser": "./public/js/lib/phaser.min.js"
+    "Phaser": "./src/lib/phaser.min.js"
   },
   "browserify-shim": {
     "Phaser": {

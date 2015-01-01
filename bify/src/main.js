@@ -1,5 +1,6 @@
 var Bullets = require('./groups/bullets');
 var Creeps = require('./groups/creeps');
+var Player = require('./sprites/player');
 
 var mainState = function (game) {
 
@@ -16,10 +17,7 @@ var mainState = function (game) {
 			var background = game.add.tileSprite(0, 0, 800, 600, 'background');
 			background.alpha = 0.7;
 
-			player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-			player.anchor.setTo(0.5, 0.5);
-			game.physics.arcade.enable(player);
-			player.body.gravity.y = 400;
+			player = new Player(game);
 
 			this.jumpSound = game.add.audio('jump');
 			this.jumpSound.volume = 0.5;
