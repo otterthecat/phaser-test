@@ -33,7 +33,7 @@ var i={localAnchorA:e,localAnchorB:f,localAxisA:g,maxForce:h,disableRotationalLo
 }).call(global, undefined, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":6}],2:[function(require,module,exports){
+},{"_process":7}],2:[function(require,module,exports){
 var boot = function(game) {
 	return {
 		preload: function (){
@@ -52,6 +52,44 @@ var boot = function(game) {
 
 module.exports = boot;
 },{}],3:[function(require,module,exports){
+var Phaser = require('Phaser');
+
+var Bullets = function (game, sprite){
+	this.direction = 'RIGHT';
+	this.sprite = sprite;
+	this.bullets = game.add.group();
+	this.bullets.enableBody = true;
+	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	this.bullets.createMultiple(1, 'bullet');
+	var anchorX = this.direction === 'LEFT' ? 0 : 1;
+	this.bullets.setAll('anchor.x', anchorX);
+	this.bullets.setAll('anchor.y', 0.5);
+	this.bullets.setAll('outOfBoundsKill', true);
+	this.bullets.setAll('checkWorldBounds', true);
+};
+
+Bullets.prototype.shoot = function (){
+	var bullet = this.bullets.getFirstExists(false);
+
+	if (bullet){
+		//  And fire it
+		bullet.reset(this.sprite.x, this.sprite.y);
+		bullet.body.velocity.x = this.direction === 'LEFT' ? -200 : 200;
+	}
+};
+
+// Currently, we're only making use of LEFT/RIGHT directions
+// adding a setter to hopefully make things more verbose when used
+Bullets.prototype.setDirection = function (direction) {
+	this.direction = direction;
+};
+
+Bullets.prototype.setControl = function (key){
+	this.control = game.input.keyboard.addKey(key || Phaser.Keyboard.SPACEBAR);
+};
+
+module.exports = Bullets;
+},{"Phaser":1}],4:[function(require,module,exports){
 var bootState = require('./boot');
 var loadState = require('./load');
 var mainState = require('./main');
@@ -65,7 +103,7 @@ game.state.add('main', mainState(game));
 
 // Kick it all off by starting the boot state
 game.state.start('boot');
-},{"./boot":2,"./load":4,"./main":5,"Phaser":1}],4:[function(require,module,exports){
+},{"./boot":2,"./load":5,"./main":6,"Phaser":1}],5:[function(require,module,exports){
 var load = function(game){
 
 	return {
@@ -109,7 +147,9 @@ var load = function(game){
 };
 
 module.exports = load;
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+var Bullets = require('./bullets');
+
 var mainState = function (game) {
 
 	return {
@@ -124,7 +164,6 @@ var mainState = function (game) {
 
 			game.physics.arcade.enable(this.player);
 			this.player.body.gravity.y = 400;
-			this.PLAYER_DIRECTION = 'RIGHT';
 
 			this.jumpSound = game.add.audio('jump');
 			this.jumpSound.volume = 0.5;
@@ -190,28 +229,8 @@ var mainState = function (game) {
 			// everything below this sprite.
 			lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
 
-			this.bullets = game.add.group();
-			this.bullets.enableBody = true;
-			this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-			this.bullets.createMultiple(1, 'bullet');
-			var anchorX = this.PLAYER_DIRECTION === 'LEFT' ? 0 : 1;
-			this.bullets.setAll('anchor.x', anchorX);
-			this.bullets.setAll('anchor.y', 0.5);
-			this.bullets.setAll('outOfBoundsKill', true);
-			this.bullets.setAll('checkWorldBounds', true);
-
+			this.bullets = new Bullets(game, this.player);
 			this.spacekey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
-			this.shoot = function() {
-				//  Grab the first bullet we can from the pool
-				var bullet = this.bullets.getFirstExists(false);
-
-				if (bullet){
-					//  And fire it
-					bullet.reset(this.player.x, this.player.y);
-					bullet.body.velocity.x = this.PLAYER_DIRECTION === 'LEFT' ? -200 : 200;
-				}
-			}
 		},
 
 		update: function (){
@@ -242,7 +261,7 @@ var mainState = function (game) {
 				enemy.kill();
 			}, null, this);
 
-			game.physics.arcade.collide(this.bullets, this.creeps, function(bullet, enemy){
+			game.physics.arcade.collide(this.bullets.bullets, this.creeps, function(bullet, enemy){
 				bullet.kill();
 				enemy.kill();
 			}, null, this);
@@ -250,11 +269,11 @@ var mainState = function (game) {
 			// move player
 			if (this.cursor.left.isDown) {
 				this.player.body.velocity.x = -160;
-				this.PLAYER_DIRECTION = 'LEFT';
+				this.bullets.setDirection('LEFT');
 			}
 			else if (this.cursor.right.isDown) {
 				this.player.body.velocity.x = 160;
-				this.PLAYER_DIRECTION = 'RIGHT';
+				this.bullets.setDirection('RIGHT');
 			}
 			else {
 				// stop player
@@ -262,7 +281,7 @@ var mainState = function (game) {
 			}
 
 			if(this.spacekey.isDown){
-				this.shoot.call(this);
+				this.bullets.shoot();
 			}
 
 			// Player must be touching the ground to jump
@@ -281,7 +300,7 @@ var mainState = function (game) {
 };
 
 module.exports = mainState;
-},{}],6:[function(require,module,exports){
+},{"./bullets":3}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -369,4 +388,4 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}]},{},[3]);
+},{}]},{},[4]);

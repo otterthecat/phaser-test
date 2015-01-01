@@ -1,3 +1,5 @@
+var Bullets = require('./bullets');
+
 var mainState = function (game) {
 
 	return {
@@ -12,7 +14,6 @@ var mainState = function (game) {
 
 			game.physics.arcade.enable(this.player);
 			this.player.body.gravity.y = 400;
-			this.PLAYER_DIRECTION = 'RIGHT';
 
 			this.jumpSound = game.add.audio('jump');
 			this.jumpSound.volume = 0.5;
@@ -78,28 +79,8 @@ var mainState = function (game) {
 			// everything below this sprite.
 			lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
 
-			this.bullets = game.add.group();
-			this.bullets.enableBody = true;
-			this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-			this.bullets.createMultiple(1, 'bullet');
-			var anchorX = this.PLAYER_DIRECTION === 'LEFT' ? 0 : 1;
-			this.bullets.setAll('anchor.x', anchorX);
-			this.bullets.setAll('anchor.y', 0.5);
-			this.bullets.setAll('outOfBoundsKill', true);
-			this.bullets.setAll('checkWorldBounds', true);
-
+			this.bullets = new Bullets(game, this.player);
 			this.spacekey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
-			this.shoot = function() {
-				//  Grab the first bullet we can from the pool
-				var bullet = this.bullets.getFirstExists(false);
-
-				if (bullet){
-					//  And fire it
-					bullet.reset(this.player.x, this.player.y);
-					bullet.body.velocity.x = this.PLAYER_DIRECTION === 'LEFT' ? -200 : 200;
-				}
-			}
 		},
 
 		update: function (){
@@ -130,7 +111,7 @@ var mainState = function (game) {
 				enemy.kill();
 			}, null, this);
 
-			game.physics.arcade.collide(this.bullets, this.creeps, function(bullet, enemy){
+			game.physics.arcade.collide(this.bullets.bullets, this.creeps, function(bullet, enemy){
 				bullet.kill();
 				enemy.kill();
 			}, null, this);
@@ -138,11 +119,11 @@ var mainState = function (game) {
 			// move player
 			if (this.cursor.left.isDown) {
 				this.player.body.velocity.x = -160;
-				this.PLAYER_DIRECTION = 'LEFT';
+				this.bullets.setDirection('LEFT');
 			}
 			else if (this.cursor.right.isDown) {
 				this.player.body.velocity.x = 160;
-				this.PLAYER_DIRECTION = 'RIGHT';
+				this.bullets.setDirection('RIGHT');
 			}
 			else {
 				// stop player
@@ -150,7 +131,7 @@ var mainState = function (game) {
 			}
 
 			if(this.spacekey.isDown){
-				this.shoot.call(this);
+				this.bullets.shoot();
 			}
 
 			// Player must be touching the ground to jump
