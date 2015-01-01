@@ -33,7 +33,7 @@ var i={localAnchorA:e,localAnchorB:f,localAxisA:g,maxForce:h,disableRotationalLo
 }).call(global, undefined, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":7}],2:[function(require,module,exports){
+},{"_process":8}],2:[function(require,module,exports){
 var boot = function(game) {
 	return {
 		preload: function (){
@@ -52,24 +52,38 @@ var boot = function(game) {
 
 module.exports = boot;
 },{}],3:[function(require,module,exports){
+var bootState = require('./boot');
+var loadState = require('./load');
+var mainState = require('./main');
+var Phaser = require('Phaser');
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO);
+
+game.state.add('boot', bootState(game));
+game.state.add('load', loadState(game));
+game.state.add('main', mainState(game));
+
+// Kick it all off by starting the boot state
+game.state.start('boot');
+},{"./boot":2,"./load":6,"./main":7,"Phaser":1}],4:[function(require,module,exports){
 var Phaser = require('Phaser');
 
 var Bullets = function (game, sprite){
 	this.direction = 'RIGHT';
 	this.sprite = sprite;
-	this.bullets = game.add.group();
-	this.bullets.enableBody = true;
-	this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-	this.bullets.createMultiple(1, 'bullet');
+	this.group = game.add.group();
+	this.group.enableBody = true;
+	this.group.physicsBodyType = Phaser.Physics.ARCADE;
+	this.group.createMultiple(1, 'bullet');
 	var anchorX = this.direction === 'LEFT' ? 0 : 1;
-	this.bullets.setAll('anchor.x', anchorX);
-	this.bullets.setAll('anchor.y', 0.5);
-	this.bullets.setAll('outOfBoundsKill', true);
-	this.bullets.setAll('checkWorldBounds', true);
+	this.group.setAll('anchor.x', anchorX);
+	this.group.setAll('anchor.y', 0.5);
+	this.group.setAll('outOfBoundsKill', true);
+	this.group.setAll('checkWorldBounds', true);
 };
 
 Bullets.prototype.shoot = function (){
-	var bullet = this.bullets.getFirstExists(false);
+	var bullet = this.group.getFirstExists(false);
 
 	if (bullet){
 		//  And fire it
@@ -89,21 +103,40 @@ Bullets.prototype.setControl = function (key){
 };
 
 module.exports = Bullets;
-},{"Phaser":1}],4:[function(require,module,exports){
-var bootState = require('./boot');
-var loadState = require('./load');
-var mainState = require('./main');
+},{"Phaser":1}],5:[function(require,module,exports){
 var Phaser = require('Phaser');
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO);
+var Creeps = function (game){
+	this.game = game;
+	this.group = game.add.group();
+	this.group.enableBody = true;
+	this.group.physicsBodyType = Phaser.Physics.ARCADE;
+	this.group.createMultiple(10, 'player');
+	this.group.setAll('anchor.x', 0.5);
+	this.group.setAll('anchor.y', 0.5);
+	this.group.setAll('outOfBoundsKill', true);
+	this.group.setAll('checkWorldBounds', true);
+	this.group.setAll('body.gravity.y', 400);
+	this.group.setAll('tint', 0xFF0033);
+};
 
-game.state.add('boot', bootState(game));
-game.state.add('load', loadState(game));
-game.state.add('main', mainState(game));
+Creeps.prototype.launchCreep = function (){
+	var MIN_SPACING = 300;
+	var MAX_SPACING = 3600;
 
-// Kick it all off by starting the boot state
-game.state.start('boot');
-},{"./boot":2,"./load":5,"./main":6,"Phaser":1}],5:[function(require,module,exports){
+	var _this = this;
+	var creep = _this.group.getFirstExists(false);
+	if (creep) {
+		creep.reset(_this.game.width / 2, -20);
+		creep.body.bounce.y = 0.6;
+		creep.body.bounce.x = 1;
+		creep.body.velocity.x = _this.game.rnd.integerInRange(0, 10) % 2 ? 75 : -75;
+	}
+	_this.game.time.events.add(_this.game.rnd.integerInRange(MIN_SPACING, MAX_SPACING), _this.launchCreep.bind(_this));
+};
+
+module.exports = Creeps;
+},{"Phaser":1}],6:[function(require,module,exports){
 var load = function(game){
 
 	return {
@@ -147,57 +180,36 @@ var load = function(game){
 };
 
 module.exports = load;
-},{}],6:[function(require,module,exports){
-var Bullets = require('./bullets');
+},{}],7:[function(require,module,exports){
+var Bullets = require('./groups/bullets');
+var Creeps = require('./groups/creeps');
 
 var mainState = function (game) {
 
+	var player,
+		bullets,
+		creeps;
+
 	return {
+
 		create: function (){
 			console.log('starting main.js');
 
 			// background
 			var background = game.add.tileSprite(0, 0, 800, 600, 'background');
 			background.alpha = 0.7;
-			this.player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-			this.player.anchor.setTo(0.5, 0.5);
 
-			game.physics.arcade.enable(this.player);
-			this.player.body.gravity.y = 400;
+			player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+			player.anchor.setTo(0.5, 0.5);
+			game.physics.arcade.enable(player);
+			player.body.gravity.y = 400;
 
 			this.jumpSound = game.add.audio('jump');
 			this.jumpSound.volume = 0.5;
 			this.jumpSound.addMarker('jumpMark', 0.1, 0.8);
 
-			this.creeps = game.add.group();
-			this.creeps.enableBody = true;
-			this.creeps.physicsBodyType = Phaser.Physics.ARCADE;
-			this.creeps.createMultiple(10, 'player');
-			this.creeps.setAll('anchor.x', 0.5);
-			this.creeps.setAll('anchor.y', 0.5);
-			this.creeps.setAll('outOfBoundsKill', true);
-			this.creeps.setAll('checkWorldBounds', true);
-			this.creeps.setAll('body.gravity.y', 400);
-			this.creeps.setAll('tint', 0xFF0033);
-
-			launchCreep.call(this);
-
-			function launchCreep() {
-
-				var _this = this;
-				var MIN_BLOCK_SPACING = 300;
-				var MAX_BLOCK_SPACING = 3600;
-				var BLOCK_SPEED = -200;
-
-				var creep = _this.creeps.getFirstExists(false);
-				if (creep) {
-					creep.reset(game.width / 2, -20);
-					creep.body.bounce.y = 0.6;
-					creep.body.bounce.x = 1;
-					creep.body.velocity.x = game.rnd.integerInRange(0, 10) % 2 ? 75 : -75;
-				}
-				game.time.events.add(game.rnd.integerInRange(MIN_BLOCK_SPACING, MAX_BLOCK_SPACING), launchCreep.bind(_this));
-			}
+			creeps = new Creeps(game);
+			creeps.launchCreep();
 
 			// initialize key controls
 			this.cursor = game.input.keyboard.createCursorKeys();
@@ -229,7 +241,7 @@ var mainState = function (game) {
 			// everything below this sprite.
 			lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
 
-			this.bullets = new Bullets(game, this.player);
+			bullets = new Bullets(game, player);
 			this.spacekey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		},
 
@@ -243,8 +255,8 @@ var mainState = function (game) {
 			this.shadowTexture.context.beginPath();
 			this.shadowTexture.context.fillStyle = 'rgb(255, 255, 255)';
 			this.shadowTexture.context.arc(
-				this.player.x,
-				this.player.y,
+				player.x,
+				player.y,
 				this.LIGHT_RADIUS,
 				0,
 				Math.PI*2
@@ -255,52 +267,52 @@ var mainState = function (game) {
 			this.shadowTexture.dirty = true;
 
 			// enable collision
-			game.physics.arcade.collide(this.player, this.layer);
-			game.physics.arcade.collide(this.creeps, this.layer);
-			game.physics.arcade.collide(this.player, this.creeps, function(player, enemy){
+			game.physics.arcade.collide(player, this.layer);
+			game.physics.arcade.collide(creeps.group, this.layer);
+			game.physics.arcade.collide(player, creeps.group, function(player, enemy){
 				enemy.kill();
 			}, null, this);
 
-			game.physics.arcade.collide(this.bullets.bullets, this.creeps, function(bullet, enemy){
+			game.physics.arcade.collide(bullets.group, creeps.group, function(bullet, enemy){
 				bullet.kill();
 				enemy.kill();
 			}, null, this);
 
 			// move player
 			if (this.cursor.left.isDown) {
-				this.player.body.velocity.x = -160;
-				this.bullets.setDirection('LEFT');
+				player.body.velocity.x = -160;
+				bullets.setDirection('LEFT');
 			}
 			else if (this.cursor.right.isDown) {
-				this.player.body.velocity.x = 160;
-				this.bullets.setDirection('RIGHT');
+				player.body.velocity.x = 160;
+				bullets.setDirection('RIGHT');
 			}
 			else {
 				// stop player
-				this.player.body.velocity.x = 0;
+				player.body.velocity.x = 0;
 			}
 
 			if(this.spacekey.isDown){
-				this.bullets.shoot();
+				bullets.shoot();
 			}
 
 			// Player must be touching the ground to jump
 			// note the .onFloor() call, which is used when tilemaps are implemented
-			if (this.cursor.up.isDown && this.player.body.onFloor()) {
-				this.player.body.velocity.y = -250;
+			if (this.cursor.up.isDown && player.body.onFloor()) {
+				player.body.velocity.y = -250;
 				this.jumpSound.play('jumpMark');
 			}
 
 			// if player falls out of world, just have him fall from the sky
-			if(this.player.y > 610){
-				this.player.y = -20;
+			if(player.y > 610){
+				player.y = -20;
 			}
 		}
 	};
 };
 
 module.exports = mainState;
-},{"./bullets":3}],7:[function(require,module,exports){
+},{"./groups/bullets":4,"./groups/creeps":5}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -388,4 +400,4 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}]},{},[4]);
+},{}]},{},[3]);

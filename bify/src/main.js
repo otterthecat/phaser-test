@@ -1,53 +1,32 @@
-var Bullets = require('./bullets');
+var Bullets = require('./groups/bullets');
+var Creeps = require('./groups/creeps');
 
 var mainState = function (game) {
 
+	var player,
+		bullets,
+		creeps;
+
 	return {
+
 		create: function (){
 			console.log('starting main.js');
 
 			// background
 			var background = game.add.tileSprite(0, 0, 800, 600, 'background');
 			background.alpha = 0.7;
-			this.player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-			this.player.anchor.setTo(0.5, 0.5);
 
-			game.physics.arcade.enable(this.player);
-			this.player.body.gravity.y = 400;
+			player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+			player.anchor.setTo(0.5, 0.5);
+			game.physics.arcade.enable(player);
+			player.body.gravity.y = 400;
 
 			this.jumpSound = game.add.audio('jump');
 			this.jumpSound.volume = 0.5;
 			this.jumpSound.addMarker('jumpMark', 0.1, 0.8);
 
-			this.creeps = game.add.group();
-			this.creeps.enableBody = true;
-			this.creeps.physicsBodyType = Phaser.Physics.ARCADE;
-			this.creeps.createMultiple(10, 'player');
-			this.creeps.setAll('anchor.x', 0.5);
-			this.creeps.setAll('anchor.y', 0.5);
-			this.creeps.setAll('outOfBoundsKill', true);
-			this.creeps.setAll('checkWorldBounds', true);
-			this.creeps.setAll('body.gravity.y', 400);
-			this.creeps.setAll('tint', 0xFF0033);
-
-			launchCreep.call(this);
-
-			function launchCreep() {
-
-				var _this = this;
-				var MIN_BLOCK_SPACING = 300;
-				var MAX_BLOCK_SPACING = 3600;
-				var BLOCK_SPEED = -200;
-
-				var creep = _this.creeps.getFirstExists(false);
-				if (creep) {
-					creep.reset(game.width / 2, -20);
-					creep.body.bounce.y = 0.6;
-					creep.body.bounce.x = 1;
-					creep.body.velocity.x = game.rnd.integerInRange(0, 10) % 2 ? 75 : -75;
-				}
-				game.time.events.add(game.rnd.integerInRange(MIN_BLOCK_SPACING, MAX_BLOCK_SPACING), launchCreep.bind(_this));
-			}
+			creeps = new Creeps(game);
+			creeps.launchCreep();
 
 			// initialize key controls
 			this.cursor = game.input.keyboard.createCursorKeys();
@@ -79,7 +58,7 @@ var mainState = function (game) {
 			// everything below this sprite.
 			lightSprite.blendMode = Phaser.blendModes.MULTIPLY;
 
-			this.bullets = new Bullets(game, this.player);
+			bullets = new Bullets(game, player);
 			this.spacekey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		},
 
@@ -93,8 +72,8 @@ var mainState = function (game) {
 			this.shadowTexture.context.beginPath();
 			this.shadowTexture.context.fillStyle = 'rgb(255, 255, 255)';
 			this.shadowTexture.context.arc(
-				this.player.x,
-				this.player.y,
+				player.x,
+				player.y,
 				this.LIGHT_RADIUS,
 				0,
 				Math.PI*2
@@ -105,45 +84,45 @@ var mainState = function (game) {
 			this.shadowTexture.dirty = true;
 
 			// enable collision
-			game.physics.arcade.collide(this.player, this.layer);
-			game.physics.arcade.collide(this.creeps, this.layer);
-			game.physics.arcade.collide(this.player, this.creeps, function(player, enemy){
+			game.physics.arcade.collide(player, this.layer);
+			game.physics.arcade.collide(creeps.group, this.layer);
+			game.physics.arcade.collide(player, creeps.group, function(player, enemy){
 				enemy.kill();
 			}, null, this);
 
-			game.physics.arcade.collide(this.bullets.bullets, this.creeps, function(bullet, enemy){
+			game.physics.arcade.collide(bullets.group, creeps.group, function(bullet, enemy){
 				bullet.kill();
 				enemy.kill();
 			}, null, this);
 
 			// move player
 			if (this.cursor.left.isDown) {
-				this.player.body.velocity.x = -160;
-				this.bullets.setDirection('LEFT');
+				player.body.velocity.x = -160;
+				bullets.setDirection('LEFT');
 			}
 			else if (this.cursor.right.isDown) {
-				this.player.body.velocity.x = 160;
-				this.bullets.setDirection('RIGHT');
+				player.body.velocity.x = 160;
+				bullets.setDirection('RIGHT');
 			}
 			else {
 				// stop player
-				this.player.body.velocity.x = 0;
+				player.body.velocity.x = 0;
 			}
 
 			if(this.spacekey.isDown){
-				this.bullets.shoot();
+				bullets.shoot();
 			}
 
 			// Player must be touching the ground to jump
 			// note the .onFloor() call, which is used when tilemaps are implemented
-			if (this.cursor.up.isDown && this.player.body.onFloor()) {
-				this.player.body.velocity.y = -250;
+			if (this.cursor.up.isDown && player.body.onFloor()) {
+				player.body.velocity.y = -250;
 				this.jumpSound.play('jumpMark');
 			}
 
 			// if player falls out of world, just have him fall from the sky
-			if(this.player.y > 610){
-				this.player.y = -20;
+			if(player.y > 610){
+				player.y = -20;
 			}
 		}
 	};
